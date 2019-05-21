@@ -32,10 +32,22 @@ defmodule Cards do
     Enum.member?(deck, card)
   end
 
+  @doc """
+    Divides a deck into a hand and the remiander to a deck.
+
+  ## Examples:
+      iex> deck = Cards.create_deck
+      iex> {hand, deck} = Cards.deal(deck, 1)
+      iex> hand
+      ["Ace of Spades"]
+  """
   def deal(deck, hand_size) do
     Enum.split(deck, hand_size)
   end
 
+  @doc """
+    Given a filename, will return an array of a Deck.
+  """
   def load(filename) do
     case File.read(filename) do
       {:error, _} -> "File does not exist."
@@ -43,11 +55,17 @@ defmodule Cards do
     end
   end
 
+  @doc """
+    Given a filename.ext, and a deck, save deck to file as binary.
+  """
   def save(deck, filename) do
     binary = :erlang.term_to_binary(deck)
     File.write(filename, binary)
   end
 
+  @doc """
+    Perform Enum.shuffle on a deck (List of cards)
+  """
   def shuffle(deck) do
     Enum.shuffle(deck)
   end
