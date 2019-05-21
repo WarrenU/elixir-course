@@ -27,6 +27,11 @@ defmodule Cards do
 
   @doc """
     Returns a bool, if a card is in a deck.
+    
+    ## Examples:
+        iex> deck = Cards.create_deck
+        iex> Cards.contains?(deck, "Q of Diamonds")
+        true
   """
   def contains?(deck, card) do
     Enum.member?(deck, card)
