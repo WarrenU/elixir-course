@@ -8,7 +8,7 @@ defmodule Cards do
   """
   def create_deck do
     values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
-    suits = ["Spade", "Club", "Diamond", "Heart"]
+    suits = ["Spades", "Clubs", "Diamonds", "Hearts"]
 
     for suit <- suits, val <- values do
       "#{val} of #{suit}"
@@ -39,7 +39,7 @@ defmodule Cards do
       iex> deck = Cards.create_deck
       iex> {hand, deck} = Cards.deal(deck, 1)
       iex> hand
-      ["Ace of Spades"]
+      ["2 of Spades"]
   """
   def deal(deck, hand_size) do
     Enum.split(deck, hand_size)
