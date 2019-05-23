@@ -12,7 +12,9 @@ defmodule Identicon do
     Given an `input`, md5 hash it, and return binary as list
   """
   def hash_input(input) do
-    :crypto.hash(:md5, input)    
+    hex_list = :crypto.hash(:md5, input)    
     |> :binary.bin_to_list
+    
+    %Identicon.Image{hex: hex_list}
   end
 end
