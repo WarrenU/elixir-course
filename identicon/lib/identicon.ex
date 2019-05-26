@@ -7,16 +7,37 @@ defmodule Identicon do
     input
     |> hash_input
     |> pick_color
+    |> build_grid
   end
 
   @doc """
-    Given an `input`, md5 hash it, and return binary as list
+    Given Image, Use enum.chunk to get every 3 elements by chunks.
+    Then we will "mirror" the first 2 elements of those 3 elements, and
+    append them to the end. This will result in a 5x5 grid.
+  """
+  def build_grid(%Identicon.Image{hex: hex_list}) do
+    hex_list
+    |> Enum.chunk(3)
+    |> Enum.map(&mirror/1)
+  end
+
+  @doc """
+    Given an `input`, md5 hash it, and return binary as list [16 elements]
   """
   def hash_input(input) do
     hex_list = :crypto.hash(:md5, input)    
     |> :binary.bin_to_list
 
     %Identicon.Image{hex: hex_list}
+  end
+
+  @doc """
+    Given a `row`, return a symmetric representation of `row`
+    For example, given: [1,2,3], return [1,2,3,2,1]
+  """
+  def mirror(row) do
+    [first, second | _tail] = row
+    row ++ [second, first]
   end
 
   @doc """
