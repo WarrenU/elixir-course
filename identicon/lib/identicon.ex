@@ -8,6 +8,30 @@ defmodule Identicon do
     |> hash_input
     |> pick_color
     |> build_grid
+    |> filter_odd_values
+    |> build_pixel_map
+    |> draw_image
+    |> save_image(input)
+  end
+
+  def draw_image(%Identicon.Image{color: color, pixel_map: pixel_map}) do
+    image = :egd.create(250, 250)
+    fill = :egd.color(color)
+    Enum.each pixel_map, fn({top_left, bot_right}) ->
+      :egd.filledRectangle(image, top_left, bot_right, fill)
+    end
+    :egd.render(image)
+  end
+
+  def build_pixel_map(%Identicon.Image{grid: grid} = image) do
+    pixel_map = Enum.map grid, fn({_value, index}) ->
+      hori_dist = rem(index, 5) * 50
+      vert_dist = div(index, 5) * 50
+      top_left_coordinate = {hori_dist, vert_dist}
+      bottom_right_coordinate = {hori_dist+50, vert_dist+50}
+      {top_left_coordinate, bottom_right_coordinate}
+    end
+    %Identicon.Image{image | pixel_map: pixel_map}
   end
 
   @doc """
@@ -15,10 +39,24 @@ defmodule Identicon do
     Then we will "mirror" the first 2 elements of those 3 elements, and
     append them to the end. This will result in a 5x5 grid.
   """
-  def build_grid(%Identicon.Image{hex: hex_list}) do
-    hex_list
-    |> Enum.chunk(3)
-    |> Enum.map(&mirror/1)
+  def build_grid(%Identicon.Image{hex: hex_list} = image) do
+    grid = 
+      hex_list
+      |> Enum.chunk_every(3)
+      |> Enum.map(&mirror/1)
+      |> List.flatten
+      |> Enum.with_index
+    %Identicon.Image{image | grid: grid}
+  end
+
+  @doc """
+    For the 25 elements of our grid, pull out all odd values.
+  """
+  def filter_odd_values(%Identicon.Image{grid: grid} = image) do
+    grid = Enum.filter grid, fn {value, _index} ->
+      rem(value, 2) == 0
+    end
+    %Identicon.Image{image | grid: grid}
   end
 
   @doc """
@@ -27,7 +65,7 @@ defmodule Identicon do
   def hash_input(input) do
     hex_list = :crypto.hash(:md5, input)    
     |> :binary.bin_to_list
-
+    |> Enum.reverse() |> tl() |> Enum.reverse()
     %Identicon.Image{hex: hex_list}
   end
 
@@ -36,6 +74,8 @@ defmodule Identicon do
     For example, given: [1,2,3], return [1,2,3,2,1]
   """
   def mirror(row) do
+    row
+    |> IO.inspect
     [first, second | _tail] = row
     row ++ [second, first]
   end
@@ -56,5 +96,9 @@ defmodule Identicon do
   """
   def pick_color(%Identicon.Image{hex: [r, g, b | _tail]} = image) do
     %Identicon.Image{image | color: {r, g, b}}
+  end
+
+  def save_image(image_file, filename) do
+    File.write("#{filename}.png", image_file)
   end
 end
