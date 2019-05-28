@@ -1,6 +1,8 @@
 defmodule Identicon do
   @moduledoc """
-  Indenticon will turn a string `input` into an "Identicon" symmetric image.
+  Indenticon will turn a string `input` into an "Identicon" symmetric image
+  and save it to your computer as a .png. The resulting Identicon is a 250x250
+  pixeled image, and is created with a 5x5 grid.
   https://en.wikipedia.org/wiki/Identicon
   """
   def main(input) do
@@ -14,6 +16,10 @@ defmodule Identicon do
     |> save_image(input)
   end
 
+  @doc """
+    Using Image's `pixel_map`, and the `egd` library, draw the content of `pixel_map`s coordinates
+    and `color`.
+  """
   def draw_image(%Identicon.Image{color: color, pixel_map: pixel_map}) do
     image = :egd.create(250, 250)
     fill = :egd.color(color)
@@ -23,6 +29,24 @@ defmodule Identicon do
     :egd.render(image)
   end
 
+  @doc """
+    Given a `grid`, calculate a pixel_map, which contains coordinates we want to fill in.
+    ## Examples:
+      iex> Identicon.hash_input("yo")
+      iex> |> Identicon.build_grid
+      iex> |> Identicon.build_pixel_map
+      %Identicon.Image{
+        hex: [109, 0, 7, 229, 47, 122, 251, 125, 90, 6, 80, 176, 255, 184, 164], 
+        color: nil, 
+        grid: [
+          {109, 0}, {0, 1}, {7, 2}, {0, 3}, {109, 4}, 
+          {229, 5}, {47, 6}, {122, 7}, {47, 8}, {229, 9}, 
+          {251, 10}, {125, 11}, {90, 12}, {125, 13}, {251, 14}, 
+          {6, 15}, {80, 16}, {176, 17}, {80, 18}, {6, 19}, 
+          {255, 20}, {184, 21}, {164, 22}, {184, 23}, {255, 24}
+        ], 
+        pixel_map: [{{0, 0}, {50, 50}}, {{50, 0}, {100, 50}}, {{100, 0}, {150, 50}}, {{150, 0}, {200, 50}}, {{200, 0}, {250, 50}}, {{0, 50}, {50, 100}}, {{50, 50}, {100, 100}}, {{100, 50}, {150, 100}}, {{150, 50}, {200, 100}}, {{200, 50}, {250, 100}}, {{0, 100}, {50, 150}}, {{50, 100}, {100, 150}}, {{100, 100}, {150, 150}}, {{150, 100}, {200, 150}}, {{200, 100}, {250, 150}}, {{0, 150}, {50, 200}}, {{50, 150}, {100, 200}}, {{100, 150}, {150, 200}}, {{150, 150}, {200, 200}}, {{200, 150}, {250, 200}}, {{0, 200}, {50, 250}}, {{50, 200}, {100, 250}}, {{100, 200}, {150, 250}}, {{150, 200}, {200, 250}}, {{200, 200}, {250, 250}}]}
+  """
   def build_pixel_map(%Identicon.Image{grid: grid} = image) do
     pixel_map = Enum.map grid, fn({_value, index}) ->
       hori_dist = rem(index, 5) * 50
@@ -90,7 +114,7 @@ defmodule Identicon do
         iex> Identicon.pick_color(image)
         %Identicon.Image{
           color: {109, 0, 7},
-          hex: [109, 0, 7, 229, 47, 122, 251, 125, 90, 6, 80, 176, 255, 184, 164, 209]
+          hex: [109, 0, 7, 229, 47, 122, 251, 125, 90, 6, 80, 176, 255, 184, 164]
         }
 
   """
